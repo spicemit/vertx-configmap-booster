@@ -18,9 +18,6 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
-/**
- *
- */
 public class HttpApplication extends AbstractVerticle {
 
     private ConfigRetriever conf;
@@ -51,25 +48,17 @@ public class HttpApplication extends AbstractVerticle {
                         config().getInteger("http.port", 8080));
 
             });
-
-        // It should use the retrieve.listen method, however it does not catch the deletion of the config map.
-        // https://github.com/vert-x3/vertx-config/issues/7
-        vertx.setPeriodic(2000, l -> {
-            conf.getConfig(ar -> {
-                if (ar.succeeded()) {
-                    if (config == null || !config.encode().equals(ar.result().encode())) {
-                        config = ar.result();
-                        LOGGER.info("New configuration retrieved: {}",
-                            ar.result().getString("message"));
-                        message = ar.result().getString("message");
-                        String level = ar.result().getString("level", "INFO");
-                        LOGGER.info("New log level: {}", level);
-                        setLogLevel(level);
-                    }
-                } else {
-                    message = null;
-                }
-            });
+        
+        conf.listen(change -> {
+            if (config == null || !config.encode().equals(change.getNewConfiguration().encode())) {
+                config = change.getNewConfiguration();
+                LOGGER.info("New configuration retrieved: {}",
+                    config.getString("message"));
+                message = config.getString("message");
+                String level = config.getString("level", "INFO");
+                LOGGER.info("New log level: {}", level);
+                setLogLevel(level);
+            }
         });
     }
 
