@@ -41,7 +41,7 @@ public class OpenShiftIT {
     }
 
     @Test
-    public void testAThatWeAreReady() throws Exception {
+    public void testAThatWeAreReady() {
         await().atMost(5, TimeUnit.MINUTES).catchUncaughtExceptions().until(() -> {
             Response response = get();
             return response.getStatusCode() < 500;
@@ -49,7 +49,7 @@ public class OpenShiftIT {
     }
 
     @Test
-    public void testBThatWeServeAsExpected() throws MalformedURLException {
+    public void testBThatWeServeAsExpected() {
         get("/api/greeting").then().body("content", equalTo("Hello, World from a ConfigMap !"));
         get("/api/greeting?name=vert.x").then().body("content", equalTo("Hello, vert.x from a ConfigMap !"));
     }
